@@ -147,20 +147,22 @@ class AirCargoProblem(Problem):
             e.g. 'FTTTFF'
         :return: list of Action objects
         """
+        def is_pos_precond(action,kb):
+            for clause in action.precond_pos:
+                if clause not in kb.clauses:
+                    return False
+            return True
+        def is_neg_precond(action,kb):
+            for clause in action.precond_neg:
+                if clause in kb.clauses:
+                    return True
+            return False
+
         possible_actions = []
         kb = PropKB()
         kb.tell(decode_state(state, self.state_map).pos_sentence())
         for action in self.actions_list:
-            is_possible = True
-            for clause in action.precond_pos:
-                if clause not in kb.clauses:
-                    is_possible = False
-                    break
-            for clause in action.precond_neg:
-                if clause in kb.clauses:
-                    is_possible = False
-                    break
-            if is_possible:
+            if is_pos_precond(action,kb) and not is_neg_precond(action,kb):
                 possible_actions.append(action)
         return possible_actions
 
@@ -225,9 +227,18 @@ class AirCargoProblem(Problem):
         carried out from the current state in order to satisfy all of the goal
         conditions by ignoring the preconditions required for an action to be
         executed.
+        
+        (see Russell-Norvig Ed-3 10.2.3  or Russell-Norvig Ed-2 11.2)
+        
+        Minimum number of actions (assuming no preconditions) equals to 
+        number of unsatisfied goals in this state.
         """
-        # TODO implement (see Russell-Norvig Ed-3 10.2.3  or Russell-Norvig Ed-2 11.2)
         count = 0
+        kb = PropKB()
+        kb.tell(decode_state(node.state, self.state_map).pos_sentence())
+        for clause in self.goal:
+            if clause not in kb.clauses:
+                count += 1
         return count
 
 
