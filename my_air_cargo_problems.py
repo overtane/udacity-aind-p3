@@ -197,6 +197,7 @@ class AirCargoProblem(Problem):
         :param state: str representing state
         :return: bool
         """
+        print(state)
         kb = PropKB()
         kb.tell(decode_state(state, self.state_map).pos_sentence())
         for clause in self.goal:
